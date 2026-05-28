@@ -1,0 +1,53 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidUser(data) {
+      return data.uid is string && data.email is string && data.role in ['traveler', 'passenger', 'sender', 'requester', 'admin'];
+    }
+
+    match /users/{userId} {
+      allow read: if isSignedIn();
+      allow write: if isOwner(userId) && isValidUser(request.resource.data);
+    }
+
+    match /rides/{rideId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.resource.data.travelerId == request.auth.uid;
+      allow update: if isSignedIn() && (resource.data.travelerId == request.auth.uid || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['availableSeats', 'status']));
+    }
+
+    match /parcels/{parcelId} {
+      allow read: if isSignedIn() && (resource.data.senderId == request.auth.uid || resource.data.travelerId == request.auth.uid);
+      allow create: if isSignedIn() && request.resource.data.senderId == request.auth.uid;
+      allow update: if isSignedIn() && (resource.data.senderId == request.auth.uid || resource.data.travelerId == request.auth.uid);
+    }
+
+    match /errands/{errandId} {
+      allow read: if isSignedIn() && (resource.data.requesterId == request.auth.uid || resource.data.travelerId == request.auth.uid);
+      allow create: if isSignedIn() && request.resource.data.requesterId == request.auth.uid;
+      allow update: if isSignedIn() && (resource.data.requesterId == request.auth.uid || resource.data.travelerId == request.auth.uid);
+    }
+
+    match /chats/{chatId} {
+      allow read: if isSignedIn() && request.auth.uid in resource.data.participants;
+      allow create: if isSignedIn() && request.auth.uid in request.resource.data.participants;
+      
+      match /messages/{messageId} {
+        allow read: if isSignedIn() && request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.participants;
+        allow create: if isSignedIn() && request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.participants && request.resource.data.senderId == request.auth.uid;
+      }
+    }
+  }
+}

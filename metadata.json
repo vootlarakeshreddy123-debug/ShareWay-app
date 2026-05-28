@@ -1,0 +1,8 @@
+{
+  "name": "ShareWay",
+  "description": "A community-based ride-sharing and errand-completion platform for traveling and helping others.",
+  "requestFramePermissions": [
+    "geolocation"
+  ],
+  "majorCapabilities": []
+}

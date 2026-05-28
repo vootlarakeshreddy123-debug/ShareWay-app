@@ -1,0 +1,126 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile and role information",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string" },
+        "displayName": { "type": "string" },
+        "phoneNumber": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "role": { "type": "string", "enum": ["traveler", "passenger", "sender", "requester", "admin"] },
+        "isVerified": { "type": "boolean" },
+        "ratings": { "type": "number" },
+        "trustScore": { "type": "number" },
+        "aadhaarVerified": { "type": "boolean" },
+        "licenseVerified": { "type": "boolean" },
+        "walletBalance": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email", "role"]
+    },
+    "Ride": {
+      "title": "Ride",
+      "description": "A ride offered by a traveler",
+      "type": "object",
+      "properties": {
+        "travelerId": { "type": "string" },
+        "origin": { "type": "object" },
+        "destination": { "type": "object" },
+        "date": { "type": "string" },
+        "time": { "type": "string" },
+        "vehicleType": { "type": "string" },
+        "availableSeats": { "type": "number" },
+        "totalSeats": { "type": "number" },
+        "fare": { "type": "number" },
+        "routePoints": { "type": "array" },
+        "status": { "type": "string", "enum": ["scheduled", "ongoing", "completed", "cancelled"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["travelerId", "origin", "destination", "date", "status"]
+    },
+    "Parcel": {
+      "title": "Parcel",
+      "description": "A parcel delivery request",
+      "type": "object",
+      "properties": {
+        "senderId": { "type": "string" },
+        "travelerId": { "type": "string" },
+        "category": { "type": "string" },
+        "weight": { "type": "number" },
+        "image": { "type": "string" },
+        "pickupAddress": { "type": "string" },
+        "dropAddress": { "type": "string" },
+        "deliveryCharge": { "type": "number" },
+        "status": { "type": "string", "enum": ["pending", "matched", "picked", "in_transit", "delivered", "cancelled"] },
+        "deliveryOTP": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "Errand": {
+      "title": "Errand",
+      "description": "A grocery or medicine errand request",
+      "type": "object",
+      "properties": {
+        "requesterId": { "type": "string" },
+        "travelerId": { "type": "string" },
+        "type": { "type": "string", "enum": ["grocery", "medicine", "courier"] },
+        "items": { "type": "array" },
+        "storeName": { "type": "string" },
+        "deliveryFee": { "type": "number" },
+        "status": { "type": "string", "enum": ["pending", "accepted", "ongoing", "completed", "cancelled"] },
+        "priority": { "type": "string" },
+        "prescriptionUrl": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "Chat": {
+      "title": "Chat",
+      "description": "Message between users",
+      "type": "object",
+      "properties": {
+        "participants": { "type": "array" },
+        "lastMessage": { "type": "string" },
+        "lastTimestamp": { "type": "string" }
+      }
+    },
+    "Message": {
+      "title": "Message",
+      "description": "A specific chat message",
+      "type": "object",
+      "properties": {
+        "senderId": { "type": "string" },
+        "text": { "type": "string" },
+        "timestamp": { "type": "string" }
+      }
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profiles"
+    },
+    "/rides/{rideId}": {
+      "schema": "Ride",
+      "description": "Offered rides"
+    },
+    "/parcels/{parcelId}": {
+      "schema": "Parcel",
+      "description": "Parcel requests"
+    },
+    "/errands/{errandId}": {
+      "schema": "Errand",
+      "description": "Errand requests"
+    },
+    "/chats/{chatId}": {
+      "schema": "Chat",
+      "description": "Chat sessions"
+    },
+    "/chats/{chatId}/messages/{messageId}": {
+      "schema": "Message",
+      "description": "Messages within a chat"
+    }
+  }
+}
